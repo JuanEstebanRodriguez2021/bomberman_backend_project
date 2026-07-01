@@ -39,6 +39,16 @@ public class JwtService {
         return claims.get("userId", Long.class);
     }
 
+    public String extractUsername(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject(); //
+    }
+
     public boolean isValid(String token) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

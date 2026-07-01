@@ -15,13 +15,13 @@ spring:
         format_sql: true
 app:
   jwt:
-    secret: ${JWT_SECRET:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30}
+    secret: ${JWT_SECRET:bomberman_local_dev_secret_32chars_ok}
     expiration-ms: 28800000
   cors:
     allowed-origin: ${FRONTEND_URL:http://localhost:5174}
   socketio:
     port: ${PORT:4001}
-    enable: ${SOCKETIO_ENABLED:false}
+    enabled: ${SOCKETIO_ENABLED:false}
 
 logging:
   level:
