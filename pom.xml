@@ -11,8 +11,8 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.arsw.bomberman</groupId>
-	<artifactId>bomberman</artifactId>
+	<groupId>com.bomberman</groupId>
+	<artifactId>backend</artifactId>
 	<version>1.0.0</version>
 	<name>bomberman-backend</name>
 	<description>Servidor de Bomberman Online - ARSW 2026-I</description>
@@ -22,13 +22,11 @@
 	</properties>
 
 	<dependencies>
-		<!-- Web (REST) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- Persistencia: PostgreSQL + JPA -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -39,13 +37,11 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Seguridad: hash de contraseñas (BCrypt) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -64,32 +60,34 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Socket.IO server (compatible con socket.io-client en React) -->
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
 			<version>2.0.12</version>
 		</dependency>
 
-		<!-- Validación de DTOs (@NotBlank, etc.) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- Logging estructurado en JSON -->
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>7.4</version>
 		</dependency>
 
-		<!-- Tests -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springdoc</groupId>
+	        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+	        <version>2.6.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>
