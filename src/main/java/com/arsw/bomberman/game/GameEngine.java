@@ -57,19 +57,21 @@ public class GameEngine {
         if (!state.getMap().isWalkable(newY, newX)) {
             return MoveResult.invalid("Movimiento bloqueado");
         }
+        final int finalX = newX;
+        final int finalY = newY;
 
         boolean bombInTarget = state.getActiveBombs().stream()
-            .anyMatch(b -> b.x() == newX && b.y() == newY);
+            .anyMatch(b -> b.x() == finalX && b.y() == finalY);
         if (bombInTarget) return MoveResult.invalid("Celda bloqueada por bomba");
 
-        player.setPosition(newX, newY);
+        player.setPosition(finalX, finalY);
 
         long latencyMs = System.currentTimeMillis() - clientTimestamp;
         eventPublisher.publishEvent(
-            new PlayerMovedEvent(roomId, userId, newX, newY, latencyMs)
+            new PlayerMovedEvent(roomId, userId, finalX, finalY, latencyMs)
         );
 
-        return MoveResult.ok(newX, newY);
+        return MoveResult.ok(finalX, finalY);
     }
 
     

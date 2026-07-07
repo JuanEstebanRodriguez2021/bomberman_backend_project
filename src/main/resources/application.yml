@@ -13,6 +13,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
 app:
   jwt:
     secret: ${JWT_SECRET:bomberman_local_dev_secret_32chars_ok}
@@ -20,7 +21,7 @@ app:
   cors:
     allowed-origin: ${FRONTEND_URL:http://localhost:5174}
   socketio:
-    port: ${PORT:4001}
+    port: ${SOCKETIO_PORT:4001}
     enabled: ${SOCKETIO_ENABLED:false}
 
 logging:

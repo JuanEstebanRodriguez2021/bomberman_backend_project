@@ -1,0 +1,31 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build con Maven
+        run: mvn clean package -DskipTests
+        env:
+          JWT_SECRET: test_secret_de_al_menos_32_caracteres_aqui
+
+      - name: Ejecutar tests
+        run: mvn test
+        env:
+          JWT_SECRET: test_secret_de_al_menos_32_caracteres_aqui
