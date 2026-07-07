@@ -29,3 +29,11 @@ jobs:
         run: mvn test
         env:
           JWT_SECRET: test_secret_de_al_menos_32_caracteres_aqui
+          SOCKETIO_ENABLED: "false"
+          PORT: "8080"
+          SOCKETIO_PORT: "9092"
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: bomberman
+          DB_USER: bombermanonline
+          DB_PASSWORD: juanes2026
