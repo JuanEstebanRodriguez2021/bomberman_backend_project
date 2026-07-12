@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Lazy;
 @org.springframework.context.annotation.Configuration
 public class SocketIOConfig {
 
-    @Value("${app.socketio.port}")
+    @Value("${app.socketio.port:${PORT:4001}}")
     private int socketIOPort;
 
     @Value("${app.socketio.enabled:false}")
@@ -28,7 +28,7 @@ public class SocketIOConfig {
         Configuration config = new Configuration();
         config.setHostname("0.0.0.0");
         config.setPort(socketIOPort);
-        config.setOrigin(allowedOrigin);
+        config.setOrigin("*");
 
         SocketIOServer server = new SocketIOServer(config);
         server.start();

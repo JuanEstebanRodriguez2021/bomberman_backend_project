@@ -32,7 +32,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/rooms/**", "/api/metrics", "/health", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**", "/api/rooms/**",
+                                "/api/metrics", "/api/profile/**",
+                                "/health", "/socket.io/**",
+                                "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
@@ -40,9 +45,15 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigin));
+        config.setAllowedOrigins(List.of(
+                allowedOrigin,
+                allowedOrigin.endsWith("/")
+                        ? allowedOrigin.substring(0, allowedOrigin.length() - 1)
+                        : allowedOrigin + "/"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
