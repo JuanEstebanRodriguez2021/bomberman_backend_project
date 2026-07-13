@@ -13,8 +13,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    autoconfigure:
-      exclude: ${EXCLUDE_WEB:}
 
 app:
   jwt:
@@ -23,7 +21,7 @@ app:
   cors:
     allowed-origin: ${FRONTEND_URL:http://localhost:5174}
   socketio:
-    port: ${SOCKETIO_PORT:4001}
+    port: ${PORT:4001}
     enabled: ${SOCKETIO_ENABLED:false}
 
 logging:
