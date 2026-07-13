@@ -12,7 +12,7 @@ public class BombermanApplication {
 		SpringApplication app = new SpringApplication(BombermanApplication.class);
 		String socket = System.getenv("SOCKETIO_ENABLED");
 		if ("true".equalsIgnoreCase(socket)){
-			app.setWebApplicationType(WebApplicationType.NONE);
+			app.setWebApplicationType(WebApplicationType.REACTIVE);
 		}
 		app.run(args);
 	}
