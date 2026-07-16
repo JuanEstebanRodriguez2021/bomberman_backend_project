@@ -36,6 +36,12 @@ public class RoomManager {
             return JoinResult.error("La sala no existe");
         }
 
+        if (room.hasPlayer(userId)) {
+            room.updateSession(userId, sessionId);
+            eventPublisher.publishEvent(new RoomJoinedEvent(roomId, userId, username, room.getPlayers().size()));
+            return JoinResult.reconnected(room);
+        }
+
         if (room.isFull()){
             eventPublisher.publishEvent(new RoomErrorEvent(roomId, userId, "room_full"));
             return JoinResult.error("La sala está llena");
@@ -56,17 +62,28 @@ public class RoomManager {
             return JoinResult.success(room, true);
         }
 
-        return JoinResult.success(room, true);
+        return JoinResult.success(room, false);
     }
 
     public void removePlayer(String sessionId){
-        rooms.values().forEach(room ->{
+        List<String> emptyRoomIds = new ArrayList<>();
+
+        rooms.forEach((roomId, room) -> {
+            if (!room.isWaiting()) {
+                return;
+            }
             int before = room.getPlayers().size();
             room.removePlayer(sessionId);
-            if (before > 0 && room.getPlayers().isEmpty()){
-                rooms.remove(room.getId());
+            if (before > 0 && room.getPlayers().isEmpty()) {
+                emptyRoomIds.add(roomId);
             }
         });
+
+        emptyRoomIds.forEach(rooms::remove);
+    }
+
+    public void removeRoom(String roomId){
+        rooms.remove(roomId);
     }
 
     public List<Room> listRooms(){
@@ -77,12 +94,15 @@ public class RoomManager {
         return Optional.ofNullable(rooms.get(roomId));
     }
 
-    public record JoinResult(boolean success, Room room, boolean gameStarted, String error){
+    public record JoinResult(boolean success, Room room, boolean gameStarted, boolean reconnected, String error){
         static JoinResult success(Room room, boolean gameStarted){
-            return new JoinResult(true, room, gameStarted, null);
+            return new JoinResult(true, room, gameStarted, false, null);
+        }
+        static JoinResult reconnected(Room room){
+            return new JoinResult(true, room, false, true, null);
         }
         static JoinResult error(String message){
-            return new JoinResult(false, null, false, message);
+            return new JoinResult(false, null, false, false, message);
         }
     }
 

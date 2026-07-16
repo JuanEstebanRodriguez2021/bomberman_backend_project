@@ -1,7 +1,9 @@
 package com.arsw.bomberman.rooms;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Room{
 
@@ -11,7 +13,7 @@ public class Room{
     private final String name;
     private final int capacity;
     private final Long createdBy;
-    private final List<Player> players = new ArrayList<>();
+    private final Map<Long, Player> players = new LinkedHashMap<>();
     private Status status = Status.WAITING;
 
     public Room(String id, String name, int capacity, Long createdBy){
@@ -40,7 +42,7 @@ public class Room{
     }
 
     public List<Player> getPlayers(){
-        return players;
+        return new ArrayList<>(players.values());
     }
 
     public Status getStatus() {
@@ -59,12 +61,23 @@ public class Room{
         return status == Status.WAITING;
     }
 
+    public boolean hasPlayer(Long userId){
+        return players.containsKey(userId);
+    }
+
     public void addPlayer(Player player){
-        players.add(player);
+        players.put(player.userId(), player);
+    }
+
+    public void updateSession(Long userId, String sessionId){
+        Player existing = players.get(userId);
+        if (existing != null){
+            players.put(userId, new Player(userId, existing.username(), sessionId));
+        }
     }
 
     public void removePlayer(String sessionId){
-        players.removeIf(p -> p.sessionId().equals(sessionId));
+        players.values().removeIf(p -> p.sessionId().equals(sessionId));
     }
 
     public void setStatus(Status status){

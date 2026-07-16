@@ -47,7 +47,7 @@ public class SocketGateway {
         server.addConnectListener(this::onConnect);
         server.addDisconnectListener(this::onDisconnect);
 
-        
+
         server.addEventListener("room:create", Map.class, (client, data, ack) -> {
             Long userId = client.get("userId");
             if (userId == null) { client.sendEvent("room:error", Map.of("message", "No autenticado")); return; }
@@ -78,22 +78,35 @@ public class SocketGateway {
             client.set("roomId", roomId);
 
             server.getRoomOperations(roomId).sendEvent("player:joined", Map.of(
-                "roomId", roomId,
-                "player", Map.of("userId", userId, "username", username),
-                "room", RoomResponse.from(result.room())
+                    "roomId", roomId,
+                    "player", Map.of("userId", userId, "username", username),
+                    "room", RoomResponse.from(result.room())
             ));
 
             if (result.gameStarted()) {
                 GameState state = gameEngine.initGame(roomId, result.room().getPlayers());
 
-                Map<String, Object> initialState = buildInitialState(state);
+                Map<String, Object> initialState = buildGameStatePayload(state);
 
                 server.getRoomOperations(roomId).sendEvent("game:start", Map.of(
-                    "roomId", roomId,
-                    "startedAt", System.currentTimeMillis(),
-                    "state", initialState
+                        "roomId", roomId,
+                        "startedAt", System.currentTimeMillis(),
+                        "state", initialState
                 ));
                 logger.info("game:start emitido roomId={}", roomId);
+                return;
+            }
+
+            if (result.reconnected()) {
+                gameEngine.getState(roomId).ifPresent(state -> {
+                    Map<String, Object> currentState = buildGameStatePayload(state);
+                    client.sendEvent("game:start", Map.of(
+                            "roomId", roomId,
+                            "startedAt", System.currentTimeMillis(),
+                            "state", currentState
+                    ));
+                    logger.info("game:start (resync) emitido a userId={} roomId={}", userId, roomId);
+                });
             }
         });
 
@@ -106,11 +119,11 @@ public class SocketGateway {
             if (userId == null || roomId == null) return;
 
             GameEngine.MoveResult result = gameEngine.movePlayer(roomId, userId, direction, clientTimestamp);
-            if (!result.valid()) return; 
+            if (!result.valid()) return;
             server.getRoomOperations(roomId).sendEvent("player:position", Map.of(
-                "userId", userId,
-                "x", result.x(),
-                "y", result.y()
+                    "userId", userId,
+                    "x", result.x(),
+                    "y", result.y()
             ));
         });
 
@@ -124,10 +137,10 @@ public class SocketGateway {
             if (!result.valid()) { client.sendEvent("bomb:error", Map.of("message", result.error())); return; }
 
             server.getRoomOperations(roomId).sendEvent("bomb:placed", Map.of(
-                "userId", userId,
-                "x", result.x(),
-                "y", result.y(),
-                "timer", 3
+                    "userId", userId,
+                    "x", result.x(),
+                    "y", result.y(),
+                    "timer", 3
             ));
         });
     }
@@ -137,14 +150,14 @@ public class SocketGateway {
         if (server == null) return;
 
         List<Map<String, Integer>> cells = event.affectedCells().stream()
-            .map(c -> Map.of("x", c[0], "y", c[1]))
-            .collect(Collectors.toList());
+                .map(c -> Map.of("x", c[0], "y", c[1]))
+                .collect(Collectors.toList());
 
         server.getRoomOperations(event.roomId()).sendEvent("bomb:explode", Map.of(
-            "x", event.x(),
-            "y", event.y(),
-            "cells", cells,
-            "eliminated", event.eliminatedPlayers()
+                "x", event.x(),
+                "y", event.y(),
+                "cells", cells,
+                "eliminated", event.eliminatedPlayers()
         ));
     }
 
@@ -152,7 +165,7 @@ public class SocketGateway {
     public void onPlayerEliminated(PlayerEliminatedEvent event) {
         if (server == null) return;
         server.getRoomOperations(event.roomId()).sendEvent("player:eliminated", Map.of(
-            "userId", event.userId()
+                "userId", event.userId()
         ));
     }
 
@@ -160,26 +173,37 @@ public class SocketGateway {
     public void onGameFinished(GameFinishedEvent event) {
         if (server == null) return;
         server.getRoomOperations(event.roomId()).sendEvent("game:over", Map.of(
-            "winnerId", event.winnerId() != null ? event.winnerId() : -1,
-            "winnerUsername", event.winnerUsername() != null ? event.winnerUsername() : "Empate"
+                "winnerId", event.winnerId() != null ? event.winnerId() : -1,
+                "winnerUsername", event.winnerUsername() != null ? event.winnerUsername() : "Empate"
         ));
         gameEngine.removeGame(event.roomId());
+        roomManager.removeRoom(event.roomId());
     }
 
-    private Map<String, Object> buildInitialState(GameState state) {
+    private Map<String, Object> buildGameStatePayload(GameState state) {
         List<Map<String, Object>> players = state.getPlayers().values().stream()
-            .map(p -> Map.<String, Object>of(
-                "userId", p.getUserId(),
-                "username", p.getUsername(),
-                "x", p.getX(),
-                "y", p.getY(),
-                "alive", p.isAlive()
-            ))
-            .toList();
+                .map(p -> Map.<String, Object>of(
+                        "userId", p.getUserId(),
+                        "username", p.getUsername(),
+                        "x", p.getX(),
+                        "y", p.getY(),
+                        "alive", p.isAlive()
+                ))
+                .toList();
+
+        List<Map<String, Object>> bombs = state.getActiveBombs().stream()
+                .map(b -> Map.<String, Object>of(
+                        "userId", b.userId(),
+                        "x", b.x(),
+                        "y", b.y(),
+                        "timer", 3
+                ))
+                .toList();
 
         return Map.of(
-            "map", state.getMap().getGrid(),
-            "players", players
+                "map", state.getMap().getGrid(),
+                "players", players,
+                "bombs", bombs
         );
     }
 
