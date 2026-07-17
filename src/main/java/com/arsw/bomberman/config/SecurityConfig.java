@@ -49,7 +49,12 @@ public class SecurityConfig {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
+
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.web.app",
+                "https://*.firebaseapp.com",
+                "https://bomberman-online-26499.web.app",
+                "http://localhost:*",
                 allowedOrigin,
                 allowedOrigin.endsWith("/")
                         ? allowedOrigin.substring(0, allowedOrigin.length() - 1)
